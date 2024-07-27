@@ -1,21 +1,21 @@
 use std::iter;
-use crate::*;
+use crate::traits::{self, Config};
 use bevy::ecs::system::Resource;
 
 #[derive(Resource)]
-pub struct Population<G: Genome> {
+pub struct Population<G: traits::Genome> {
     config: G::Config,
     species: Vec<Species<G>>,
 }
 
-impl<G: Genome> Population<G> {
+impl<G: traits::Genome> Population<G> {
     pub fn new(config: G::Config) -> Self {
         Self {
             config: config.clone(),
             species: iter::once(Species {
-                representative: G::new(config.clone()),
+                representative: G::minimal(&config),
                 shared_fitness: Default::default(),
-                members: iter::repeat_with(|| G::new(config.clone())).take(config.pop_size()).collect()
+                members: iter::repeat_with(|| G::minimal(&config)).take(config.pop_size()).collect()
             }).collect(),
         }
     }
@@ -27,7 +27,7 @@ impl<G: Genome> Population<G> {
     }
 }
 
-pub struct Species<G: Genome> {
+pub struct Species<G: traits::Genome> {
     representative: G,
     shared_fitness: Option<f32>,
     members: Vec<G>

@@ -2,7 +2,7 @@
 
 use std::ops::Add;
 use bevy::prelude::*;
-use bevy_neat::*;
+use bevy_neat::{Config, FeedForwardGenome, Population, traits::Genome};
 
 const INPUT_LEN: usize = 2;
 const OUTPUT_LEN: usize = 1;
@@ -18,7 +18,7 @@ const XOR_OUTPUTS: [f32; 4] = [0.0, 1.0, 1.0, 0.0];
 fn main() {
     App::new()
         .add_plugins(MinimalPlugins)
-        .insert_resource(Population::<FeedForwardGenome>::new(DefaultConfig::new(
+        .insert_resource(Population::<FeedForwardGenome>::new(Config::new(
             INPUT_LEN, OUTPUT_LEN,
             POP_SIZE, COMP_THRESH,
             C1, C2, C3

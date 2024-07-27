@@ -13,16 +13,16 @@ impl<G: Genome> Population<G> {
         Self {
             config: config.clone(),
             species: iter::once(Species {
-                representative: G::new(config.clone()).unwrap(),
+                representative: G::new(config.clone()),
                 shared_fitness: Default::default(),
-                members: iter::repeat_with(|| G::new(config.clone()).unwrap()).take(config.pop_size()).collect()
+                members: iter::repeat_with(|| G::new(config.clone())).take(config.pop_size()).collect()
             }).collect(),
         }
     }
 
     pub fn run(&mut self, fitness_fn: impl Fn(&G, &G::Config) -> f32) {
         for genome in self.species.iter_mut().flat_map(|species| species.members.iter_mut()) {
-            genome.set_fitness(fitness_fn(&genome, &self.config), &self.config).unwrap();
+            genome.set_fitness(fitness_fn(&genome, &self.config), &self.config);
         }
     }
 }

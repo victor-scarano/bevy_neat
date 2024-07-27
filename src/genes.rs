@@ -125,31 +125,31 @@ impl NodeGene {
         self.0.clone()
     }
 
-    pub fn forward<T>(&self, f: impl Fn(&BTreeSet<ConnGene>) -> T) -> Result<T, ()> {
+    pub fn forward<T>(&self, f: impl Fn(&BTreeSet<ConnGene>) -> T) -> T {
         match self.0.lock().unwrap().deref() {
-            NodeKind::Input { forward } | NodeKind::Hidden { forward, .. } => Ok(f(forward)),
-            NodeKind::Output { .. } => Err(()),
+            NodeKind::Input { forward } | NodeKind::Hidden { forward, .. } => f(forward),
+            NodeKind::Output { .. } => f(&Default::default()),
         }
     }
 
-    pub fn backward<T>(&self, f: impl Fn(&BTreeSet<ConnGene>) -> T) -> Result<T, ()> {
+    pub fn backward<T>(&self, f: impl Fn(&BTreeSet<ConnGene>) -> T) -> T {
         match self.0.lock().unwrap().deref() {
-            NodeKind::Input { .. } => Err(()),
-            NodeKind::Hidden { backward, .. } | NodeKind::Output { backward } => Ok(f(backward)),
+            NodeKind::Input { .. } => f(&mut Default::default()),
+            NodeKind::Hidden { backward, .. } | NodeKind::Output { backward } => f(backward),
         }
     }
 
-    pub fn forward_mut<T>(&self, mut f: impl FnMut(&mut BTreeSet<ConnGene>) -> T) -> Result<T, ()> {
+    pub fn forward_mut<T>(&self, mut f: impl FnMut(&mut BTreeSet<ConnGene>) -> T) -> T {
         match self.0.lock().unwrap().deref_mut() {
-            NodeKind::Input { forward } | NodeKind::Hidden { forward, .. } => Ok(f(forward)),
-            NodeKind::Output { .. } => Err(()),
+            NodeKind::Input { forward } | NodeKind::Hidden { forward, .. } => f(forward),
+            NodeKind::Output { .. } => f(&mut Default::default()),
         }
     }
 
-    pub fn backward_mut<T>(&self, mut f: impl FnMut(&mut BTreeSet<ConnGene>) -> T) -> Result<T, ()> {
+    pub fn backward_mut<T>(&self, mut f: impl FnMut(&mut BTreeSet<ConnGene>) -> T) -> T {
         match self.0.lock().unwrap().deref_mut() {
-            NodeKind::Input { .. } => Err(()),
-            NodeKind::Hidden { backward, .. } | NodeKind::Output { backward } => Ok(f(backward)),
+            NodeKind::Input { .. } => f(&mut Default::default()),
+            NodeKind::Hidden { backward, .. } | NodeKind::Output { backward } => f(backward),
         }
     }
 }
@@ -162,8 +162,8 @@ impl Ord for NodeGene {
             return Ordering::Equal;
         }
 
-        let temp = self.backward(|backward| backward.len()).unwrap_or(0)
-            .cmp(&other.backward(|backward| backward.len()).unwrap_or(0))
+        let temp = self.backward(|backward| backward.len())
+            .cmp(&other.backward(|backward| backward.len()))
             .reverse();
 
         self.kind().lock().unwrap().cmp(&other.kind().lock().unwrap()).clone().then(temp)

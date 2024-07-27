@@ -1,24 +1,22 @@
 use std::sync::{atomic::{AtomicU32, Ordering}, Arc};
+use crate::{Activation, Sigmoid};
 
 pub trait Config: Clone {
     type Innov;
+    type Activation: Activation;
 
     fn innov(&self) -> Self::Innov;
-
+    fn activation(&self) -> Self::Activation;
     fn input_len(&self) -> usize;
-
     fn output_len(&self) -> usize;
-
     fn pop_size(&self) -> usize;
-
     fn comp_thresh(&self) -> f32;
-
     fn c1(&self) -> f32;
-
     fn c2(&self) -> f32;
-
     fn c3(&self) -> f32;
 }
+
+
 
 #[derive(Clone)]
 pub struct DefaultConfig {
@@ -49,8 +47,10 @@ impl DefaultConfig {
 
 impl Config for DefaultConfig {
     type Innov = Arc<Innov>;
+    type Activation = Sigmoid;
 
     fn innov(&self) -> Self::Innov { self.innov.clone() }
+    fn activation(&self) -> Self::Activation { Default::default() }
     fn input_len(&self) -> usize { self.input_len }
     fn output_len(&self) -> usize { self.output_len }
     fn pop_size(&self) -> usize { self.pop_size }

@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 
+use std::ops::Add;
 use bevy::prelude::*;
 use bevy_neat::*;
 
@@ -28,13 +29,9 @@ fn main() {
 
 fn setup(mut population: ResMut<Population<FeedForwardGenome>>) {
     population.run(|genome, config| {
-        let mut fitness = 4.0;
-
-        for (xor_input, xor_output) in XOR_INPUTS.into_iter().zip(XOR_OUTPUTS.into_iter()) {
-            let output = genome.activate([xor_input.0, xor_input.1].into(), config).unwrap();
-            fitness -= (output[0] - xor_output).powi(2);
-        }
-
-        fitness
+        XOR_INPUTS.into_iter().zip(XOR_OUTPUTS.into_iter()).map(|(xi, xo)| {
+            let output = genome.activate([xi.0, xi.1].into(), config);
+            -(output.first().cloned().unwrap() - xo).powi(2)
+        }).sum::<f32>().add(4.0)
     });
 }

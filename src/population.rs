@@ -24,6 +24,8 @@ impl<G: traits::Genome> Population<G> {
         for genome in self.species.iter_mut().flat_map(|species| species.members.iter_mut()) {
             genome.set_fitness(fitness_fn(&genome, &self.config), &self.config);
         }
+
+        todo!()
     }
 }
 

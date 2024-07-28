@@ -1,5 +1,10 @@
 #![allow(dead_code)]
 
+// TODO: Remove the trait bounds on the traits that are not neccessary for the population struct. Instead, specify these
+// triat bounds on the other trait implementations that require such bounds.
+// Also, all constant variables in the genome implementation are placeholders for future config variables. Add these to
+// the config implementation and remove the constants from the current implementation in the future.
+
 mod activations;
 mod config;
 mod conn;
@@ -29,8 +34,8 @@ pub mod traits {
         fn mut_conn_weight(&mut self, config: &Self::Config) -> Self::ConnGene;
         fn activate(&self, input: Vec<f32>, config: &Self::Config) -> Vec<f32>;
         fn set_fitness(&mut self, fitness: f32, config: &Self::Config);
-        fn crossover(&self, other: &Self, config: &Self::Config) -> Self;
         fn comp_dist(&self, other: &Self, config: &Self::Config) -> f32;
+        fn crossover(&self, other: &Self, config: &Self::Config) -> Self;
     }
 
     pub trait Config<G: Genome>: Clone + Sized {

@@ -25,8 +25,10 @@ where
         Self(Arc::new(Mutex::new(ConnInner { in_node, out_node, weight, enabled: true, innov })))
     }
 
-    pub fn disable(&self) {
-        self.0.lock().unwrap().enabled = false;
+    pub fn set_weight(&self, weight: f32) { self.0.lock().unwrap().weight = weight }
+
+    pub fn set_enabled(&self, enabled: bool) {
+        self.0.lock().unwrap().enabled = enabled;
     }
 }
 

@@ -1,13 +1,13 @@
-use std::{collections::BTreeSet, sync::atomic::{AtomicU32, Ordering}};
+use std::{collections::BTreeSet, num::NonZeroUsize, sync::atomic::{AtomicU32, Ordering}};
 use crate::{Sigmoid, traits::{self, ConnGene, Genome}};
 
 #[derive(Clone)]
 pub struct Config<G> where G: Genome + Clone, G::ConnGene: Ord {
-    conn_genes: BTreeSet<G::ConnGene>,
+    history: BTreeSet<G::ConnGene>,
     input_len: usize,
     output_len: usize,
     pop_size: usize,
-    comp_thresh: f32,
+    comp_thresh: f32, // Might want to change to NonZero?
     c1: f32,
     c2: f32,
     c3: f32,
@@ -18,8 +18,14 @@ where
     G: Genome + Clone,
     G::ConnGene: Ord
 {
-    pub fn new(input_len: usize, output_len: usize, pop_size: usize, comp_thresh: f32, c1: f32, c2: f32, c3: f32) -> Self {
-        Self { conn_genes: Default::default(), input_len, output_len, pop_size, comp_thresh, c1, c2, c3 }
+    pub fn new(input_len: NonZeroUsize, output_len: NonZeroUsize, pop_size: NonZeroUsize, comp_thresh: f32, c1: f32, c2: f32, c3: f32) -> Self {
+        Self {
+            history: Default::default(),
+            input_len: input_len.into(),
+            output_len: output_len.into(),
+            pop_size: pop_size.into(),
+            comp_thresh, c1, c2, c3
+        }
     }
 }
 
@@ -32,19 +38,19 @@ where
     type Activation = Sigmoid;
 
     fn innov(&self, in_node: G::NodeGene, out_node: G::NodeGene) -> u32 {
-        self.conn_genes.iter()
+        self.history.iter()
             .find(|c| (c.in_node(), c.out_node()).eq(&(in_node.clone(), out_node.clone())))
             .and_then(|c| Some(c.innov()))
-            .unwrap_or(self.conn_genes.first().cloned().and_then(|c| Some(c.innov())).unwrap_or(0))
+            .unwrap_or(self.history.first().cloned().and_then(|c| Some(c.innov())).unwrap_or(0))
     }
 
     fn activation(&self) -> Self::Activation { Default::default() }
 
-    fn input_len(&self) -> usize { self.input_len }
+    fn input_len(&self) -> usize { self.input_len.into() }
 
-    fn output_len(&self) -> usize { self.output_len }
+    fn output_len(&self) -> usize { self.output_len.into() }
 
-    fn pop_size(&self) -> usize { self.pop_size }
+    fn pop_size(&self) -> usize { self.pop_size.into() }
 
     fn comp_thresh(&self) -> f32 { self.comp_thresh }
 
